@@ -1,0 +1,14 @@
+# Makefile to compile the module in this directory
+
+MODULES = mobenchmark
+moportmap_HEADERS = $(wildcard *.h)
+moportmap_SOURCES = $(wildcard *.cpp)
+moportmap_MOD_DIR = apps
+
+DYNAMIC_LINK_LIBRARIES = mort moutil
+
+DYNAMIC_MACOS_LINK_LIBRARIES = momodest mofiber moio moevent moconfig mocrypto mocompress monet mohttp mologging movalidation mokernel modata moapp
+DYNAMIC_WINDOWS_LINK_LIBRARIES = momodest mofiber moio moevent moconfig mocrypto mocompress monet mohttp mologging movalidation mokernel modata moapp
+
+# ----------- Standard Makefile
+include @MONARCH_BENCH_DIR@/setup/Makefile.base

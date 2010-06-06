@@ -1,0 +1,108 @@
+# This file contains basic Makefile includes that contain all 
+# common building instructions for all binaries and packages.
+
+.PHONY: all build-setup build-clean build-directories build-headers build-objects build-libraries build-executables clean clean-objects clean-libraries
+
+all: build-objects build-libraries build-executables
+
+PLATFORM=@PLATFORM@
+BUILD_FOR_LINUX=@BUILD_FOR_LINUX@
+BUILD_FOR_WINDOWS=@BUILD_FOR_WINDOWS@
+BUILD_FOR_MACOS=@BUILD_FOR_MACOS@
+
+AR_FLAGS = cr
+
+MONARCH = $(realpath @MONARCH_DIR@)
+TOP_SRC_DIR = $(MONARCH)
+TOP_BUILD_DIR = $(MONARCH)
+
+INCLUDES += -I$(TOP_BUILD_DIR)/dist/include 
+
+CWD = $(shell pwd)
+ifndef HEADER_DIST_DIR
+HEADER_DIST_DIR = dist/include/monarch/$(notdir $(CWD))
+endif
+
+# Build rules common to each platform
+ifdef PRINT_COMMANDS
+PCMD=
+else
+PCMD=@
+endif
+
+.SECONDEXPANSION:
+
+# Variables for all platforms
+
+CXX = @CXX@
+CXX_FLAGS += @CXXFLAGS@ @DEFS@ -Wall
+LD_FLAGS += @LDFLAGS@
+LIBS += -L$(LIB_DIR)
+AR = @AR@
+AS = @AS@
+LIB_PREFIX=@LIB_PREFIX@
+DYNAMIC_LIB_EXT=@DYNAMIC_LIB_EXT@
+STATIC_LIB_EXT=@STATIC_LIB_EXT@
+EXECUTABLE_EXT=@EXECUTABLE_EXT@
+
+# Platform-specific variables
+
+ifeq ($(BUILD_FOR_LINUX),yes)
+PLATFORM_NAME=LINUX
+CXX_FLAGS += -march=i686 -fPIC -DLINUX $(MODULE_CXX_FLAGS) $(MODULE_LINUX_CXX_FLAGS)
+LIBS += -L/usr/lib/mysql
+DYNAMIC_LINK_LIBRARIES += $(DYNAMIC_LINUX_LINK_LIBRARIES)
+DYNAMIC_EXECUTABLE_LIBRARIES += $(DYNAMIC_LINUX_EXECUTABLE_LIBRARIES)
+endif
+
+ifeq ($(BUILD_FOR_MACOS),yes)
+PLATFORM_NAME=MACOS
+# TODO: support build target config and use -march=i686/powerpc/etc
+CXX_FLAGS += -fPIC -DMACOS $(MODULE_CXX_FLAGS) $(MODULE_MACOS_CXX_FLAGS)
+LIB_LD_FLAGS += \
+	-Wl,-dylib_compatibility_version,@FULL_DOTTED_VERSION@ \
+	-Wl,-dylib_current_version,@FULL_DOTTED_VERSION@
+# Add default location for Fink
+INCLUDES += -I/sw/include 
+LIBS += -L/sw/lib
+DYNAMIC_LINK_LIBRARIES += $(DYNAMIC_MACOS_LINK_LIBRARIES)
+DYNAMIC_EXECUTABLE_LIBRARIES += $(DYNAMIC_MACOS_EXECUTABLE_LIBRARIES)
+endif
+
+ifeq ($(BUILD_FOR_WINDOWS),yes)
+PLATFORM_NAME=WINDOWS
+CXX_FLAGS += -march=i686 -D_WIN32_WINNT=0x0501 $(MODULE_CXX_FLAGS)
+LD_FLAGS += -Wl,--enable-auto-import
+INCLUDES += \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/pthread/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/openssl/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/expat/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/mysql/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/regex/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/sqlite3/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/zlib/include \
+	-I$(TOP_SRC_DIR)/cpp/3rdparty/iconv/include
+DYNAMIC_LINK_LIBRARIES += $(DYNAMIC_WINDOWS_LINK_LIBRARIES)
+DYNAMIC_EXECUTABLE_LIBRARIES += $(DYNAMIC_WINDOWS_EXECUTABLE_LIBRARIES)
+endif
+
+# Platform-agnostic build rules 
+
+include $(TOP_SRC_DIR)/setup/baserules.mk
+
+build-setup:
+
+build-clean:
+
+$(ALL_DIRECTORIES):
+	mkdir -p $@
+
+clean: build-clean clean-libraries clean-objects
+
+build-headers: $(ALL_HEADERS)
+
+build-objects: $(ALL_DIRECTORIES) $(ALL_SOURCES) $(ALL_OBJECTS)
+
+build-libraries: $(ALL_DIRECTORIES) $(ALL_LIBRARIES)
+
+build-executables: $(ALL_DIRECTORIES) $(ALL_EXECUTABLES)
