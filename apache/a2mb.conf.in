@@ -57,6 +57,8 @@ MaxKeepAliveRequests 100
 #
 KeepAliveTimeout 15
 
+ServerLimit 3000
+
 ##
 ## Server-Pool Size Regulation (MPM specific)
 ## 
@@ -70,8 +72,8 @@ KeepAliveTimeout 15
 <IfModule mpm_prefork_module>
     StartServers          5
     MinSpareServers       5
-    MaxSpareServers      10
-    MaxClients          150
+    MaxSpareServers     100
+    MaxClients         3000
     MaxRequestsPerChild   0
 </IfModule>
 
@@ -86,12 +88,12 @@ KeepAliveTimeout 15
 # ThreadsPerChild: constant number of worker threads in each server process
 # MaxRequestsPerChild: maximum number of requests a server process serves
 <IfModule mpm_worker_module>
-    StartServers          2
+    StartServers          5 
     MinSpareThreads      25
-    MaxSpareThreads      75 
-    ThreadLimit          64
+    MaxSpareThreads     100 
+    ThreadLimit         125 
     ThreadsPerChild      25
-    MaxClients          150
+    MaxClients         3000
     MaxRequestsPerChild   0
 </IfModule>
 
@@ -103,11 +105,11 @@ KeepAliveTimeout 15
 # ThreadsPerChild: constant number of worker threads in each server process
 # MaxRequestsPerChild: maximum number of requests a server process serves
 <IfModule mpm_event_module>
-    StartServers          2
-    MaxClients          150
+    StartServers         5 
+    MaxClients         3000
     MinSpareThreads      25
-    MaxSpareThreads      75 
-    ThreadLimit          64
+    MaxSpareThreads     100 
+    ThreadLimit         125 
     ThreadsPerChild      25
     MaxRequestsPerChild   0
 </IfModule>
