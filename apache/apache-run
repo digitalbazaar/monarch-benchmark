@@ -1,4 +1,5 @@
 #!/usr/bin/env sh
 #
 # Runs an Apache server that is used by the Monarch Benchmarking suite
+mkdir -p apache2
 /usr/sbin/apache2 -f `pwd`/a2mb.conf -k start
