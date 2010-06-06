@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 #
 # Stops the Apache Web server that is used by the Monarch Benchmarking suite
-/usr/sbin/apache2 -f `pwd`/a2mb.cf -k stop
+/usr/sbin/apache2 -f `pwd`/a2mb.conf -k stop
