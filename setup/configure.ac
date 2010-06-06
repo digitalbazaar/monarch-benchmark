@@ -20,6 +20,11 @@ FULL_VERSION=${PACKAGE_VERSION}-${DATE_YMD}
 # Setup standard build environment variables
 MONARCH_BENCH_DIR=`pwd`
 
+# Setup Apache benchmark directories
+APACHE_BENCHMARK_DIR="${MONARCH_BENCH_DIR}/apache"
+APACHE_BENCHMARK_USER=`whoami`
+APACHE_BENCHMARK_GROUP=`groups | cut -f1 -d' '`
+
 # Check for particular build options
 AC_ARG_ENABLE([linux],
    AS_HELP_STRING([--enable-linux], [compile for linux [[yes]]]),
