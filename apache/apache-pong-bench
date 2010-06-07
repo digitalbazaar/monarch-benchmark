@@ -1,10 +1,15 @@
 #!/usr/bin/env sh
 #
 # Run the benchmark 
-autobench --single_host --host1 apache-benchmarks.local --uri1 /pong.php --quiet --low_rate 100 --high_rate 1000 --rate_step 100 --num_call 1 --num_conn 3000 --timeout 5 --file apache-pong-benchmark.tsv
+START_RATE=10
+RATE_STEP=25
+END_RATE=500
+
+ulimit -n $(($END_RATE + 1000))
+autobench --single_host --host1 apache-benchmarks.local --uri1 /pong.php --quiet --low_rate $START_RATE --high_rate $END_RATE --rate_step $RATE_STEP --num_call 1 --num_conn $END_RATE --timeout 5 --file apache-pong-benchmark.tsv
 
 # Generate a graphical report of the findings
-bench2graph apache-pong-benchmark.tsv apache-pong-benchmark.ps && convert -rotate 90 apache-pong-benchmark.ps apache-pong-benchmark.png
+echo "Apache+PHP MPM Worker Benchmark" | bench2graph apache-pong-benchmark.tsv apache-pong-benchmark.ps && convert -rotate 90 apache-pong-benchmark.ps apache-pong-benchmark.png
 
-rm apache-pong-benchmark.ps apache-pong-benchmark.tsv
-
+mv apache-pong-benchmark.png apache-benchmarks.local/
+rm apache-pong-benchmark.ps

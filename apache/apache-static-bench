@@ -1,10 +1,16 @@
 #!/usr/bin/env sh
 #
 # Run the benchmark 
-autobench --single_host --host1 apache-benchmarks.local --uri1 /static.html --quiet --low_rate 100 --high_rate 1000 --rate_step 100 --num_call 1 --num_conn 3000 --timeout 5 --file apache-static-benchmark.tsv
+START_RATE=250
+RATE_STEP=250
+END_RATE=6000
+
+ulimit -n $(($END_RATE + 1000))
+autobench --single_host --host1 apache-benchmarks.local --uri1 /static.html --quiet --low_rate $START_RATE --high_rate $END_RATE --rate_step $RATE_STEP --num_call 1 --num_conn $END_RATE --timeout 5 --file apache-static-benchmark.tsv
 
 # Generate a graphical report of the findings
-bench2graph apache-static-benchmark.tsv apache-static-benchmark.ps && convert -rotate 90 apache-static-benchmark.ps apache-static-benchmark.png
+echo "Apache Static File Benchmark" | bench2graph apache-static-benchmark.tsv apache-static-benchmark.ps && convert -rotate 90 apache-static-benchmark.ps apache-static-benchmark.png
 
-rm apache-static-benchmark.ps apache-static-benchmark.tsv
+mv apache-static-benchmark.png apache-benchmarks.local/
+rm apache-static-benchmark.ps
 
