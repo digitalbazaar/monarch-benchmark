@@ -9,7 +9,6 @@ DATA_DIR=$1
 # Set the data directory if it wasn't set on the command line
 [ -n "$DATA_DIR" ] || DATA_DIR=testdata
 
-
 # Get plot files and pathnames
 FILES=`ls -tr1 $DATA_DIR/*.dat`
 THROUGHPUT=$DATA_DIR/gnuplot-throughput.plot
@@ -23,7 +22,8 @@ set nokey
 set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Requests per Second (throughput)\"
-plot \"$THROUGHPUT.data\" using 1:2 with lines
+plot \"$THROUGHPUT.data\" using 1:2 with points, \\
+     \"$THROUGHPUT.data\" using 1:2 smooth bezier lt 7 with lines
 pause -1""" > $THROUGHPUT
 echo "# concurrency requests/sec" > $THROUGHPUT.data
 
@@ -34,7 +34,8 @@ set nokey
 set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Latency (ms)\"
-plot \"$LATENCY.data\" using 1:2 with lines
+plot \"$LATENCY.data\" using 1:2 with points, \\
+     \"$LATENCY.data\" using 1:2 smooth bezier lt 7 with lines
 pause -1""" > $LATENCY
 echo "# concurrency time/req" > $LATENCY.data
 
@@ -45,7 +46,8 @@ set nokey
 set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Completed Requests\"
-plot \"$COMPLETED.data\" using 1:2 with lines
+plot \"$THROUGHPUT.data\" using 1:2 with points, \\
+     \"$THROUGHPUT.data\" using 1:2 smooth bezier lt 7 with lines
 pause -1""" > $COMPLETED
 echo "# concurrency time/req" >> $COMPLETED.data
 

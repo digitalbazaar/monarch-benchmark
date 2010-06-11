@@ -32,7 +32,7 @@ echo "Testing $CUR_RATE concurrent connections - $REQUESTS total requests."
 ab -q -n $REQUESTS -c $CUR_RATE -r $URI > testdata/$CUR_RATE.dat
 
 # Sleep to ensure file descriptors are freed by the kernel
-sleep 30
+sleep 5
 
 # Calculate the next current rate
 if [ $CUR_RATE -lt $RATE_STEP ]
