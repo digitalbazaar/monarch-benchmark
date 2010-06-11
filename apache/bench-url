@@ -1,11 +1,12 @@
 #!/usr/bin/env sh
 #
-# Benchmarks an API call and saves the output to a file
+# Benchmarks a URL and saves the output to a file
+#
+# Usage: bench-url http://example.org/foo.php
 URI=$1
 START_RATE=1
-RATE_STEP=1000
+RATE_STEP=100
 END_RATE=10001
-TEST_TIME=15
 REQUESTS=100000
 
 # Check to make sure a URI was specified on the command line
@@ -29,6 +30,9 @@ do
 # Perform the benchmark
 echo "Testing $CUR_RATE concurrent connections - $REQUESTS total requests."
 ab -q -n $REQUESTS -c $CUR_RATE -r $URI > testdata/$CUR_RATE.dat
+
+# Sleep to ensure file descriptors are freed by the kernel
+sleep 30
 
 # Calculate the next current rate
 if [ $CUR_RATE -lt $RATE_STEP ]

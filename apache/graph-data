@@ -20,37 +20,34 @@ COMPLETED=$DATA_DIR/gnuplot-completed-requests.plot
 echo """
 set title \"Concurrency vs. Throughput\"
 set nokey
-set xrange[0:10000]
-set yrange[0:20000]
+set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Requests per Second (throughput)\"
-plot \"-\" using 1:2 with lines
-""" > $THROUGHPUT
-echo "# concurrency requests/sec" >> $THROUGHPUT
+plot \"$THROUGHPUT.data\" using 1:2 with lines
+pause -1""" > $THROUGHPUT
+echo "# concurrency requests/sec" > $THROUGHPUT.data
 
 # Setup gnuplot file for latency graph
 echo -e """
 set title \"Concurrency vs. Latency\"
 set nokey
-set xrange[0:10000]
-set yrange[0:20000]
+set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Latency (ms)\"
-plot \"-\" using 1:2 with lines
-""" > $LATENCY
-echo "# concurrency time/req" >> $LATENCY
+plot \"$LATENCY.data\" using 1:2 with lines
+pause -1""" > $LATENCY
+echo "# concurrency time/req" > $LATENCY.data
 
 # Setup gnuplot file for completed requests graph
 echo -e """
 set title \"Concurrency vs. Completed Requests\\\\n(Number of completed requests in 15 seconds)\"
 set nokey
-set xrange[0:10000]
-set yrange[0:50000]
+set autoscale
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Completed Requests\"
-plot \"-\" using 1:2 with lines
-""" > $COMPLETED
-echo "# concurrency time/req" >> $COMPLETED
+plot \"$COMPLETED.data\" using 1:2 with lines
+pause -1""" > $COMPLETED
+echo "# concurrency time/req" >> $COMPLETED.data
 
 for file in $FILES
 do
@@ -59,11 +56,8 @@ do
    REQ_PER_SEC=`cat $file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
    TIME_PER_REQ=`cat $file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
    COMPLETE_REQ=`cat $file  | grep "Complete requests:" | cut -f2 -d: | tr -d ' '`
-   echo "$CONCURRENCY $REQ_PER_SEC" >> $THROUGHPUT
-   echo "$CONCURRENCY $TIME_PER_REQ" >> $LATENCY
-   echo "$CONCURRENCY $COMPLETE_REQ" >> $COMPLETED
+   echo "$CONCURRENCY $REQ_PER_SEC" >> $THROUGHPUT.data
+   echo "$CONCURRENCY $TIME_PER_REQ" >> $LATENCY.data
+   echo "$CONCURRENCY $COMPLETE_REQ" >> $COMPLETED.data
 done
 
-echo -e "\nend\npause -1\n" >> $THROUGHPUT
-echo -e "\nend\npause -1\n" >> $LATENCY
-echo -e "\nend\npause -1\n" >> $COMPLETED
