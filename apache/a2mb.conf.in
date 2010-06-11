@@ -57,28 +57,18 @@ MaxKeepAliveRequests 100
 #
 KeepAliveTimeout 15
 
-##
-## Server-Pool Size Regulation (MPM specific)
-## 
-
-# worker MPM
-# StartServers: initial number of server processes to start
-# MaxClients: maximum number of simultaneous client connections
-# MinSpareThreads: minimum number of worker threads which are kept spare
-# MaxSpareThreads: maximum number of worker threads which are kept spare
-# ThreadLimit: ThreadsPerChild can be changed to this maximum value during a
-#              graceful restart. ThreadLimit can only be changed by stopping
-#              and starting Apache.
-# ThreadsPerChild: constant number of worker threads in each server process
+# prefork MPM
+# StartServers: number of server processes to start
+# MinSpareServers: minimum number of server processes which are kept spare
+# MaxSpareServers: maximum number of server processes which are kept spare
+# MaxClients: maximum number of server processes allowed to start
 # MaxRequestsPerChild: maximum number of requests a server process serves
-<IfModule mpm_worker_module>
-    ServerLimit        3000
-    StartServers         20 
-    MinSpareThreads      10
-    MaxSpareThreads      64
-    ThreadLimit          64
-    ThreadsPerChild      64
-    MaxClients         2944
+<IfModule mpm_prefork_module>
+    ServerLimit         500
+    StartServers        100 
+    MinSpareServers     100 
+    MaxSpareServers     500
+    MaxClients          500
     MaxRequestsPerChild   0
 </IfModule>
 
@@ -128,11 +118,11 @@ ErrorLog @APACHE_BENCHMARK_DIR@/apache2/error.log
 # Possible values include: debug, info, notice, warn, error, crit,
 # alert, emerg.
 #
-LogLevel warn
+LogLevel emerg
 
 # Include module configuration:
-Include /etc/apache2/mods-available/fcgid.load
-Include /etc/apache2/mods-available/fcgid.conf
+Include /etc/apache2/mods-available/php5.load
+Include /etc/apache2/mods-available/php5.conf
 Include /etc/apache2/mods-available/mime.load
 Include /etc/apache2/mods-available/mime.conf
 Include /etc/apache2/mods-available/autoindex.load
@@ -155,26 +145,12 @@ LogFormat "%h %l %u %t \"%r\" %>s %O" common
 LogFormat "%{Referer}i -> %U" referer
 LogFormat "%{User-agent}i" agent
 
-# FCGID Settings
-<IfModule mod_fcgid.c>
-  SharememPath @APACHE_BENCHMARK_DIR@/apache2/fcgid_shm
-  Options ExecCGI Indexes
-  FCGIWrapper /usr/lib/cgi-bin/php5 .php
-  AddHandler fcgid-script .php
-  SocketPath @APACHE_BENCHMARK_DIR@/apache2/
-  IdleTimeout 3600
-  ProcessLifeTime 7200
-  MaxProcessCount 8
-  DefaultMaxClassProcessCount 2
-  IPCConnectTimeout 8
-  IPCCommTimeout 60
-</IfModule>
+
 
 # Include the virtual host configurations:
 <VirtualHost *:8001>
    ServerName apache-bencmarks.local
    DocumentRoot @APACHE_BENCHMARK_DIR@/apache-benchmarks.local
    ErrorLog @APACHE_BENCHMARK_DIR@/apache2/apache-benchmarks.local-error.log
-   CustomLog @APACHE_BENCHMARK_DIR@/apache2/apache-benchmarks.local-access.log full
 </VirtualHost>
 

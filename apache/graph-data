@@ -1,0 +1,18 @@
+#!/usr/bin/env sh
+#
+# Graphs benchmarking data
+DATA_DIR=testdata
+FILES=`ls -tr1 $DATA_DIR`
+
+echo -e "# concurrency\trequests/sec" > $DATA_DIR/gnuplot-throughput.dat
+echo -e "# concurrency\ttime/req" > $DATA_DIR/gnuplot-latency.dat
+for file in $FILES
+do
+   echo "Processing $file"
+   CONCURRENCY=`cat $DATA_DIR/$file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
+   REQ_PER_SEC=`cat $DATA_DIR/$file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   TIME_PER_REQ=`cat $DATA_DIR/$file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   echo -e "$CONCURRENCY\t\t$REQ_PER_SEC" >> $DATA_DIR/gnuplot-throughput.dat
+   echo -e "$CONCURRENCY\t\t$TIME_PER_REQ" >> $DATA_DIR/gnuplot-latency.dat
+done
+
