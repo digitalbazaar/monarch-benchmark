@@ -2,17 +2,44 @@
 #
 # Graphs benchmarking data
 DATA_DIR=testdata
-FILES=`ls -tr1 $DATA_DIR`
+FILES=`ls -tr1 $DATA_DIR/*.dat`
+THROUGHPUT=$DATA_DIR/gnuplot-throughput.plot
+LATENCY=$DATA_DIR/gnuplot-latency.plot
 
-echo -e "# concurrency\trequests/sec" > $DATA_DIR/gnuplot-throughput.dat
-echo -e "# concurrency\ttime/req" > $DATA_DIR/gnuplot-latency.dat
+# Setup gnuplot file for throughput graph
+echo -e """
+set title \"Concurrency vs. Throughput\"
+set nokey
+set xrange[0:10000]
+set yrange[0:2000]
+set xlabel \"Simultaneous Requests (concurrency)\"
+set ylabel \"Requests per Second (throughput)\"
+plot \"-\" using 1:2 with lines
+""" > $THROUGHPUT
+echo -e "# concurrency requests/sec" >> $THROUGHPUT
+
+# Setup gnuplot file for latency graph
+echo -e """
+set title \"Concurrency vs. Latency\"
+set nokey
+set xrange[0:10000]
+set yrange[0:20000]
+set xlabel \"Simultaneous Requests (concurrency)\"
+set ylabel \"Latency (ms)\"
+plot \"-\" using 1:2 with lines
+""" > $LATENCY
+echo -e "# concurrency time/req" >> $LATENCY
+
 for file in $FILES
 do
    echo "Processing $file"
-   CONCURRENCY=`cat $DATA_DIR/$file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
-   REQ_PER_SEC=`cat $DATA_DIR/$file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
-   TIME_PER_REQ=`cat $DATA_DIR/$file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
-   echo -e "$CONCURRENCY\t\t$REQ_PER_SEC" >> $DATA_DIR/gnuplot-throughput.dat
-   echo -e "$CONCURRENCY\t\t$TIME_PER_REQ" >> $DATA_DIR/gnuplot-latency.dat
+   CONCURRENCY=`cat $file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
+   REQ_PER_SEC=`cat $file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   TIME_PER_REQ=`cat $file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   echo -e "$CONCURRENCY $REQ_PER_SEC" >> $DATA_DIR/gnuplot-throughput.plot
+   echo -e "$CONCURRENCY $TIME_PER_REQ" >> $DATA_DIR/gnuplot-latency.plot
 done
+
+echo -e "end\npause -1\n" >> $THROUGHPUT
+echo -e "end\npause -1\n" >> $LATENCY
 
