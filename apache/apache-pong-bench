@@ -2,8 +2,8 @@
 #
 # Run the benchmark 
 START_RATE=10
-RATE_STEP=25
-END_RATE=500
+RATE_STEP=50
+END_RATE=1000
 
 ulimit -n $(($END_RATE + 1000))
 autobench --single_host --host1 apache-benchmarks.local --uri1 /pong.php --quiet --low_rate $START_RATE --high_rate $END_RATE --rate_step $RATE_STEP --num_call 1 --num_conn $END_RATE --timeout 5 --file apache-pong-benchmark.tsv

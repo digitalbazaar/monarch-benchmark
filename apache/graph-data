@@ -1,22 +1,32 @@
-#!/usr/bin/env sh
+#!/usr/bin/env /bin/bash
 #
 # Graphs benchmarking data
-DATA_DIR=testdata
+
+# If the data directory was specified on the command line, use it, otherwise
+# use the "testdata" directory.
+DATA_DIR=$1
+
+# Set the data directory if it wasn't set on the command line
+[ -n "$DATA_DIR" ] || DATA_DIR=testdata
+
+
+# Get plot files and pathnames
 FILES=`ls -tr1 $DATA_DIR/*.dat`
 THROUGHPUT=$DATA_DIR/gnuplot-throughput.plot
 LATENCY=$DATA_DIR/gnuplot-latency.plot
+COMPLETED=$DATA_DIR/gnuplot-completed-requests.plot
 
 # Setup gnuplot file for throughput graph
-echo -e """
+echo """
 set title \"Concurrency vs. Throughput\"
 set nokey
 set xrange[0:10000]
-set yrange[0:2000]
+set yrange[0:20000]
 set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Requests per Second (throughput)\"
 plot \"-\" using 1:2 with lines
 """ > $THROUGHPUT
-echo -e "# concurrency requests/sec" >> $THROUGHPUT
+echo "# concurrency requests/sec" >> $THROUGHPUT
 
 # Setup gnuplot file for latency graph
 echo -e """
@@ -28,7 +38,19 @@ set xlabel \"Simultaneous Requests (concurrency)\"
 set ylabel \"Latency (ms)\"
 plot \"-\" using 1:2 with lines
 """ > $LATENCY
-echo -e "# concurrency time/req" >> $LATENCY
+echo "# concurrency time/req" >> $LATENCY
+
+# Setup gnuplot file for completed requests graph
+echo -e """
+set title \"Concurrency vs. Completed Requests\\\\n(Number of completed requests in 15 seconds)\"
+set nokey
+set xrange[0:10000]
+set yrange[0:50000]
+set xlabel \"Simultaneous Requests (concurrency)\"
+set ylabel \"Completed Requests\"
+plot \"-\" using 1:2 with lines
+""" > $COMPLETED
+echo "# concurrency time/req" >> $COMPLETED
 
 for file in $FILES
 do
@@ -36,10 +58,12 @@ do
    CONCURRENCY=`cat $file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
    REQ_PER_SEC=`cat $file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
    TIME_PER_REQ=`cat $file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
-   echo -e "$CONCURRENCY $REQ_PER_SEC" >> $DATA_DIR/gnuplot-throughput.plot
-   echo -e "$CONCURRENCY $TIME_PER_REQ" >> $DATA_DIR/gnuplot-latency.plot
+   COMPLETE_REQ=`cat $file  | grep "Complete requests:" | cut -f2 -d: | tr -d ' '`
+   echo "$CONCURRENCY $REQ_PER_SEC" >> $THROUGHPUT
+   echo "$CONCURRENCY $TIME_PER_REQ" >> $LATENCY
+   echo "$CONCURRENCY $COMPLETE_REQ" >> $COMPLETED
 done
 
-echo -e "end\npause -1\n" >> $THROUGHPUT
-echo -e "end\npause -1\n" >> $LATENCY
-
+echo -e "\nend\npause -1\n" >> $THROUGHPUT
+echo -e "\nend\npause -1\n" >> $LATENCY
+echo -e "\nend\npause -1\n" >> $COMPLETED
