@@ -10,7 +10,7 @@ DATA_DIR=$1
 [ -n "$DATA_DIR" ] || DATA_DIR=testdata
 
 # Get plot files and pathnames
-FILES=`ls -tr1 $DATA_DIR/*.dat`
+FILES=`ls -1 $DATA_DIR | grep "\.dat$" | sort -h`
 THROUGHPUT=$DATA_DIR/gnuplot-throughput.plot
 LATENCY=$DATA_DIR/gnuplot-latency.plot
 COMPLETED=$DATA_DIR/gnuplot-completed-requests.plot
@@ -53,11 +53,11 @@ echo "# concurrency time/req" >> $COMPLETED.data
 
 for file in $FILES
 do
-   echo "Processing $file"
-   CONCURRENCY=`cat $file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
-   REQ_PER_SEC=`cat $file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
-   TIME_PER_REQ=`cat $file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
-   COMPLETE_REQ=`cat $file  | grep "Complete requests:" | cut -f2 -d: | tr -d ' '`
+   echo "Processing $DATA_DIR/$file"
+   CONCURRENCY=`cat $DATA_DIR/$file | grep "Concurrency Level:" | cut -f 2 -d: | tr -d ' '`
+   REQ_PER_SEC=`cat $DATA_DIR/$file | grep "Requests per second" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   TIME_PER_REQ=`cat $DATA_DIR/$file  | grep "Time per request:" | grep "(mean)" | cut -f2 -d: | cut -f1 -d[ | tr -d ' '`
+   COMPLETE_REQ=`cat $DATA_DIR/$file  | grep "Complete requests:" | cut -f2 -d: | tr -d ' '`
    echo "$CONCURRENCY $REQ_PER_SEC" >> $THROUGHPUT.data
    echo "$CONCURRENCY $TIME_PER_REQ" >> $LATENCY.data
    echo "$CONCURRENCY $COMPLETE_REQ" >> $COMPLETED.data
