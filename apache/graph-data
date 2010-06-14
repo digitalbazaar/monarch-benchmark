@@ -10,7 +10,7 @@ DATA_DIR=$1
 [ -n "$DATA_DIR" ] || DATA_DIR=testdata
 
 # Get plot files and pathnames
-FILES=`ls -1 $DATA_DIR | grep "\.dat$" | sort -h`
+FILES=`ls -1 $DATA_DIR | grep "\.dat$" | sort -g`
 THROUGHPUT=$DATA_DIR/gnuplot-throughput.plot
 LATENCY=$DATA_DIR/gnuplot-latency.plot
 COMPLETED=$DATA_DIR/gnuplot-completed-requests.plot
